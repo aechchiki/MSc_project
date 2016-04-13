@@ -15,6 +15,7 @@ a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /
 
 # aim: adapter removal 
 # program: cutadapt-1.8
+#
 # move to datadir
 cd /home/jroux/archive/MinION/run_Illumina_2015_11_19
 # run cutadapt on all .fastq.gz
