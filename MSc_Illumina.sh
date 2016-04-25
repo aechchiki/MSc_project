@@ -49,28 +49,45 @@ cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic
 a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /bin/bash -J trimmomaticfastqc$a -N "export PATH=/software/bin:$PATH; module add UHTS/Quality_control/fastqc/0.11.2; fastqc -t 2 -o /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic/fastqc /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic/$i"; done
 # output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic/fastqc
 
-# download .fasta & annotation 
 
-# aim: extract cds 
+# aim: get reference genome and annotation 
+# 
+# create dir for ref files 
+mkdir /scratch/cluster/monthly/aechchik/MSc/dmel_files; cd /scratch/cluster/monthly/aechchik/MSc/dmel_files
+# download Dmel genome
+wget ftp://ftp.ensemblgenomes.org/pub/metazoa/release-31/fasta/drosophila_melanogaster/dna/Drosophila_melanogaster.BDGP6.31.dna.genome.fa.gz
+# unzip genome
+gunzip Drosophila_melanogaster.BDGP6.31.dna.genome.fa.gz
+
+# download Dmel gtf
+wget ftp://ftp.ensembl.org/pub/release-84/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.84.gtf.gz
+# unzip annotation
+gunzip Drosophila_melanogaster.BDGP6.84.gtf.gz
+
+# aim: extract transcripts 
 # program: cufflinks/2.2.1 
 # 
 # submit job 
-bsub -q dee-hugemem -L /bin/bash -J dmel_cds -N "module add UHTS/Assembler/cufflinks/2.2.1; gffread -g /scratch/cluster/monthly/aechchik/MSc/dmel_files/genome/dm6.fa -x dm6_cds.fa /scratch/cluster/monthly/aechchik/MSc/dmel_files/genome/dm6.gtf"
-# how many cds
-cd /scratch/cluster/monthly/aechchik/MSc/dmel_files/genome; awk '/>/{ print }'  dm6_cds.fa | wc -l # 30318
+bsub -q dee-hugemem -L /bin/bash -J dmel_transcripts -N "module add UHTS/Assembler/cufflinks/2.2.1; gffread -g Drosophila_melanogaster.BDGP6.31.dna.genome.fa -x Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa Drosophila_melanogaster.BDGP6.84.gtf"
+# how many transcripts
+awk '/>/{ print }' Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa | wc -l # 30353
 
 # aim: index the reference 
 # program: /kallisto/0.42.4
 # 
 # submit job 
-bsub -q dee-hugemem -L /bin/bash -J index_dmel -N "module add UHTS/Analysis/kallisto/0.42.4; kallisto index -i dm6_cds.idx dm6_cds.fa"
+bsub -q dee-hugemem -L /bin/bash -J index_dmel -N "module add UHTS/Analysis/kallisto/0.42.4; kallisto index -i Drosophila_melanogaster.BDGP6.31.dna.transcripts.idx Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa"
 
 # aim: pseudoalignment of reads to ref
 # program: /kallisto/0.42.4
 # 
-# submit job 
+# create dir 
 #
-bsub -J kallisto_pseudobamSA4 "kallisto quant -i  Pseud_protegens_S5_cds.idx -o /scratch/cluster/monthly/mls_2015/aechchik/kallisto -b 100 --paired -l 365 -s 0 --pseudobam /scratch/cluster/monthly/mls_2015/aechchik/SA4_qc/SA4t.fastq.gz > SA4t.sam"
+mkdir /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto
+# sumbit job
+bsub -J kallisto_quant "module add UHTS/Analysis/kallisto/0.42.4; kallisto quant -i /scratch/cluster/monthly/aechchik/MSc/dmel_files/Drosophila_melanogaster.BDGP6.31.dna.transcripts.idx -o /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto -b 100 -l 243 -s 30 --pseudobam /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq.gz > /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto/Dmel_align.bam | samtools view -Sb - > /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto/Dmel_align.bam"
+
+
 
 
 
