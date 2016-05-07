@@ -134,3 +134,11 @@ bsub -q dee-hugemem -J hisat2_nogtf "module add UHTS/Aligner/hisat/2.0.2; module
 cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt
 # submit job 
 bsub -q dee-hugemem -J hisat2_gtf "module add UHTS/Aligner/hisat/2.0.2; module add UHTS/Analysis/samtools/1.3; hisat2 -x /scratch/cluster/monthly/aechchik/MSc/dmel_files/bt2_index.idx -1 `ls *_R1* | tr '\n' ','` -2 `ls *_R2* | tr '\n' ','` --known-splicesite-infile /scratch/cluster/monthly/aechchik/MSc/dmel_files/Drosophila_melanogaster.BDGP6.splices.txt  | samtools view -bS  > hisat_known-splicesite.bam"
+
+# aim: genome indexing by star
+# software: STAR/2.5.0b
+#
+# move to dir
+cd /scratch/cluster/monthly/aechchik/MSc/dmel_files/
+# submit job 
+bsub -q dee-hugemem -J star_idx "module add UHTS/Aligner/STAR/2.5.0b; STAR --runThreadN 8 --runMode genomeGenerate --genomeDir /scratch/cluster/monthly/aechchik/MSc/dmel_files/ --genomeFastaFiles Drosophila_melanogaster.BDGP6.31.dna.genome.fa --sjdbGTFfile Drosophila_melanogaster.BDGP6.84.gtf"
