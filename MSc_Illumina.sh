@@ -31,24 +31,6 @@ cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt
 a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /bin/bash -J cutadaptfastqc$a -N "export PATH=/software/bin:$PATH; module add UHTS/Quality_control/fastqc/0.11.2; fastqc -t 2 -o /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/fastqc /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/$i"; done
 # output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/fastqc
 
-# aim: adapter removal 
-# software: trimmomatic/0.33
-#
-# move to datadir
-cd /home/jroux/archive/MinION/run_Illumina_2015_11_19
-# submit job 
-a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -M 20971520 -L /bin/bash -J trimmomatic$a -N "export PATH=/software/bin:$PATH; module add UHTS/Analysis/trimmomatic/0.33; trimmomatic SE -threads 8 /home/jroux/archive/MinION/run_Illumina_2015_11_19/$i /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/$i ILLUMINACLIP:/scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_adapter/Illumina_Index22.txt:3:25:6 LEADING:9 TRAILING:9 SLIDINGWINDOW:4:15 MINLEN:60"; done
-# output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic
-
-# aim: quality check on trimmomatic output
-# software: fastqc-0.11.2
-# 
-# move to datadir
-cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic
-# submit job 
-a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /bin/bash -J trimmomaticfastqc$a -N "export PATH=/software/bin:$PATH; module add UHTS/Quality_control/fastqc/0.11.2; fastqc -t 2 -o /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic/fastqc /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic/$i"; done
-# output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic/fastqc
-
 # aim: get reference genome and annotation
 # 
 # create dir for ref files 
@@ -147,4 +129,4 @@ bsub -M 8388608 -q dee-hugemem -J star_idx "module add UHTS/Aligner/STAR/2.5.0b;
 # software: STAR/2.5.0b
 #
 # submit job 
-bsub -q dee-hugemem -J star_map "module add UHTS/Aligner/STAR/2.5.0b; STAR --runThreadN 8 --genomeDir /scratch/cluster/monthly/aechchik/MSc/dmel_files/ --readFilesIn /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq"
+bsub -q dee-hugemem -J star_map "module add UHTS/Aligner/STAR/2.5.0b; STAR --runThreadN 8 --genomeDir /scratch/cluster/monthly/aechchik/MSc/dmel_files/ --readFilesIn /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/Reads1.fastq /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/Reads2.fastq"
