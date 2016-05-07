@@ -5,7 +5,7 @@
 ls /home/jroux/archive/MinION/run_Illumina_2015_11_19 # paired-end reads
 
 # aim: quality check
-# program: fastqc-0.11.2
+# software: fastqc-0.11.2
 # 
 # move to datadir
 cd /home/jroux/archive/MinION/run_Illumina_2015_11_19
@@ -14,7 +14,7 @@ a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /
 # output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_fastqc_raw
 
 # aim: adapter removal 
-# program: cutadapt/1.8
+# software: cutadapt/1.8
 #
 # move to datadir
 cd /home/jroux/archive/MinION/run_Illumina_2015_11_19
@@ -23,7 +23,7 @@ a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /
 # output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt
 
 # aim: quality check on cutadapt output
-# program: fastqc-0.11.2
+# software: fastqc-0.11.2
 # 
 # move to datadir
 cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt
@@ -32,7 +32,7 @@ a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -L /
 # output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/fastqc
 
 # aim: adapter removal 
-# program: trimmomatic/0.33
+# software: trimmomatic/0.33
 #
 # move to datadir
 cd /home/jroux/archive/MinION/run_Illumina_2015_11_19
@@ -41,7 +41,7 @@ a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -M 2
 # output in /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic
 
 # aim: quality check on trimmomatic output
-# program: fastqc-0.11.2
+# software: fastqc-0.11.2
 # 
 # move to datadir
 cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/trimmomatic
@@ -63,21 +63,21 @@ wget ftp://ftp.ensembl.org/pub/release-84/gtf/drosophila_melanogaster/Drosophila
 gunzip Drosophila_melanogaster.BDGP6.84.gtf.gz
 
 # aim: extract transcripts 
-# program: cufflinks/2.2.1 
+# software: cufflinks/2.2.1 
 # 
 # submit job 
 bsub -q dee-hugemem -L /bin/bash -J dmel_transcripts -N "module add UHTS/Assembler/cufflinks/2.2.1; gffread -g Drosophila_melanogaster.BDGP6.31.dna.genome.fa -x Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa Drosophila_melanogaster.BDGP6.84.gtf"
 # how many transcripts
 awk '/>/{ print }' Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa | wc -l # 30353
 
-# aim: indexing by kallisto
-# program: /kallisto/0.42.4
+# aim: genome indexing by kallisto
+# software: kallisto/0.42.4
 # 
 # submit job 
 bsub -q dee-hugemem -L /bin/bash -J index_dmel -N "module add UHTS/Analysis/kallisto/0.42.4; kallisto index -i Drosophila_melanogaster.BDGP6.31.dna.transcripts.idx Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa"
 
-# aim: quantification by kallisto
-# program: /kallisto/0.42.4
+# aim: transcript quantification by kallisto
+# software: kallisto/0.42.4
 # 
 # create dir 
 mkdir /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto
@@ -96,6 +96,41 @@ for file in *fastq.gz; do mv $file $(basename $file .fastq.gz)_R2.fastq.gz; done
 mv *.gz ../ # move to original directory
 ls  /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/ # files are ordered num1_R1.fastq.gz num1_R2.fastq.gz num2_R1.fastq.gz num2_R2.fastq.gz ...
 # kallisto will consider them as pairs? hope so
-
+#
 # sumbit job
-bsub -J kallisto_quant "module add UHTS/Analysis/kallisto/0.42.4; kallisto quant -i /scratch/cluster/monthly/aechchik/MSc/dmel_files/Drosophila_melanogaster.BDGP6.31.dna.transcripts.idx -o /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto -b 100 -l 243 -s 30 /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq.gz"
+bsub -J kallisto_quant "module add UHTS/Analysis/kallisto/0.42.4; kallisto quant -i /scratch/cluster/monthly/aechchik/MSc/dmel_files/Drosophila_melanogaster.BDGP6.31.dna.transcripts.idx -o /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto -b 100 /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq.gz"
+
+# note: hisat2 works with unzipped files 
+gunzip /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq.gz
+
+# aim: genome indexing by hisat2
+# software: hisat/2.0.2
+#
+# move to dir
+cd /scratch/cluster/monthly/aechchik/MSc/dmel_files/
+# submit job 
+bsub "module add UHTS/Aligner/hisat/2.0.2; hisat2-build Drosophila_melanogaster.BDGP6.31.dna.genome.fa"
+
+# aim: extract splice sites from gtf for hisat2
+# software: hisat/2.0.2
+#
+# move to dir
+cd /scratch/cluster/monthly/aechchik/MSc/dmel_files/
+# submit job 
+bsub -q dee-hugemem "module add UHTS/Aligner/hisat/2.0.2; extract_splice_sites.py Drosophila_melanogaster.BDGP6.31.dna.genome.fa"
+
+# aim: map reads vs ref (no known gtf as input)
+# software: hisat/2.0.2; samtools/1.3
+#
+# move to dir
+cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt
+# submit job 
+bsub -q dee-hugemem -J hisat2_nogtf "module add UHTS/Aligner/hisat/2.0.2; module add UHTS/Analysis/samtools/1.3; hisat2 -x /scratch/cluster/monthly/aechchik/MSc/dmel_files/bt2_index.idx -1 `ls *_R1* | tr '\n' ','` -2 `ls *_R2* | tr '\n' ','` | samtools view -bS > hisat.bam"
+
+# aim: map reads vs ref (known gtf as input)
+# software: hisat/2.0.2
+#
+# move to dir
+cd /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt
+# submit job 
+bsub -q dee-hugemem -J hisat2_gtf "module add UHTS/Aligner/hisat/2.0.2; module add UHTS/Analysis/samtools/1.3; hisat2 -x /scratch/cluster/monthly/aechchik/MSc/dmel_files/bt2_index.idx -1 `ls *_R1* | tr '\n' ','` -2 `ls *_R2* | tr '\n' ','` --known-splicesite-infile /scratch/cluster/monthly/aechchik/MSc/dmel_files/Drosophila_melanogaster.BDGP6.splices.txt  | samtools view -bS  > hisat_known-splicesite.bam"
