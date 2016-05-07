@@ -141,4 +141,12 @@ bsub -q dee-hugemem -J hisat2_gtf "module add UHTS/Aligner/hisat/2.0.2; module a
 # move to dir
 cd /scratch/cluster/monthly/aechchik/MSc/dmel_files/
 # submit job 
-bsub -q dee-hugemem -J star_idx "module add UHTS/Aligner/STAR/2.5.0b; STAR --runThreadN 8 --runMode genomeGenerate --genomeDir /scratch/cluster/monthly/aechchik/MSc/dmel_files/ --genomeFastaFiles Drosophila_melanogaster.BDGP6.31.dna.genome.fa --sjdbGTFfile Drosophila_melanogaster.BDGP6.84.gtf"
+bsub -M 8388608 -q dee-hugemem -J star_idx "module add UHTS/Aligner/STAR/2.5.0b; STAR --runThreadN 8 --runMode genomeGenerate --genomeDir /scratch/cluster/monthly/aechchik/MSc/dmel_files/ --genomeFastaFiles Drosophila_melanogaster.BDGP6.31.dna.genome.fa --sjdbGTFfile Drosophila_melanogaster.BDGP6.84.gtf"
+
+# aim: map reads vs ref
+# software: STAR/2.5.0b
+#
+# move to dir
+cd /scratch/cluster/monthly/aechchik/MSc/dmel_files/
+# submit job 
+bsub -q dee-hugemem -J star_map "module add UHTS/Aligner/STAR/2.5.0b; STAR --runThreadN 8 --genomeDir /scratch/cluster/monthly/aechchik/MSc/dmel_files/ --readFilesIn /scratch/cluster/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq"
