@@ -72,7 +72,7 @@ a=0; for i in $(ls *.fastq.gz); do echo $i; a=$((a+1)); bsub -q dee-hugemem -J c
 # -o: specified output file
 # -m: define min length for the read to be kept. 36 was calculated: 100 (read length) - 64 (full adapter length)
 # --too-short-output: specified output file for discarded reads
-GATCGGAAGAGCACACGTCTGAACTCCAGTCACCGTACGTAATCTCGTATGCCGTCTTCTGCTT
+
 # quality control on trimmed and filtered reads
 # software: fastqc-0.11.2
 #
@@ -240,11 +240,6 @@ a=0; for i in $(ls *.sorted*); do echo $i; a=$((a+1)); bsub -M 20971520 -q dee-h
 
 # TODO: subsection 
 #TODO: repeat on filtered/unfiltered cutadapt
-
-# load Cufflinks 
-module add UHTS/Assembler/cufflinks/2.2.1;
-module add UHTS/Analysis/kallisto/0.42.4;
-
 
 
 ## cufflinks & kallisto 
