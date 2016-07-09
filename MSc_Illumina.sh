@@ -263,3 +263,6 @@ bsub -q dee-hugemem -L /bin/bash -J index_dmel -N "module add UHTS/Analysis/kall
 # 
 # sumbit job
 bsub -J kallisto_quant "module add UHTS/Analysis/kallisto/0.42.4; kallisto quant -i /scratch/beegfs/monthly/aechchik/MSc/dmel_files/Drosophila_melanogaster.BDGP6.31.dna.transcripts.idx -o /scratch/beegfs/monthly/aechchik/MSc/MSc_Illumina/Ill_kallisto -b 100 /scratch/beegfs/monthly/aechchik/MSc/MSc_Illumina/Ill_trimmed/cutadapt/*.fastq.gz"
+
+STAR --outFileNamePrefix /scratch/beegfs/monthly/aechchik/MSc/illumina/alignment/star/star_nogtf/test0/001 --runThreadN 8 --genomeDir /scratch/beegfs/monthly/aechchik/MSc/dmel_files/star_idx/nogtf_idx --readFilesCommand zcat --readFilesIn /scratch/beegfs/monthly/aechchik/MSc/illumina/cutadapt/filtered/001_R1.fastq.gz /scratch/beegfs/monthly/aechchik/MSc/illumina/cutadapt/filtered/001_R2.fastq.gz --outFilterMismatchNoverLmax 0.03 --outFilterMultimapNmax 1
+
