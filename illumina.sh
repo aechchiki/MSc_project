@@ -87,4 +87,77 @@ gffread -g $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa -x $dmel/
 
 ## 3) alignment
 
+# prepare wdir 
+hiseq_aln=/scratch/beegfs/monthly/aechchik/MSc/illumina/alignment
+mkdir -p $hiseq_aln
+
+# hisat2
+
+# load hisat2
+module add UHTS/Aligner/hisat/2.0.2
+# index genome
+hisat2-build $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa $dmel/genome/hisat
+# build a list of known splice sites
+hisat2_extract_splice_sites.py $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf > $dmel/gtf/gtf_splicesites.txt
+# prepare outdir
+mkdir -p $hiseq_aln/hisat/
+# alignment 1-pass 
+# note: tested with -M 20971520 on LSF
+hisat2 -q --phred33 --known-splicesite-infile $dmel/gtf/gtf_splicesites.txt --novel-splicesite-outfile $dmel/gtf/hisat1_new_splicesites.txt --rna-strandness RF --dta-cufflinks -x $dmel/genome/hisat -1 $hiseq_trim/R1_paired.gz -2 $hiseq_trim/R2_paired.gz -S $hiseq_aln/hisat/hisat_1pass.sam
+# alignment 2-pass
+# note: tested with -M 20971520 on LSF
+hisat2 -q --phred33 --known-splicesite-infile $dmel/gtf/gtf_splicesites.txt --novel-splicesite-infile $dmel/gtf/hisat1_new_splicesites.txt --rna-strandness RF --dta-cufflinks -x $dmel/genome/hisat -1 $hiseq_trim/R1_paired.gz -2 $hiseq_trim/R2_paired.gz -S $hiseq_aln/hisat/hisat_2pass.sam
+
+
+# star 
+
+# load star
+module add UHTS/Aligner/STAR/2.5.0b
+# index genome 
+STAR --runMode genomeGenerate --genomeDir $dmel/genome/star/ --genomeFastaFiles $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa --sjdbGTFfile $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf --sjdbOverhang 100
+# prepare outdir
+mkdir -p $hiseq_aln/star/
+# alignment 1-pass
+# note: tested with -M 20971520 on LSF
+STAR --genomeDir $dmel/genome/star/ --readFilesIn $hiseq_trim/R1_paired.gz $hiseq_trim/R2_paired.gz --outFilterMismatchNoverLmax 0.04 --alignSJDBoverhangMin 1 --outFileNamePrefix $hiseq_aln/star/star
+# prepare alignment 2-pass
+# note: need to re-index genome with new splice junctions
+# note: tested with -M 8388608 on LSF
+STAR --runMode genomeGenerate --genomeDir $dmel/genome/star2/ --genomeFastaFiles $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa --sjdbGTFfile $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf --sjdbFileChrStartEnd $hiseq_aln/star/star/STARSJ.out.tab --sjdbOverhang 100
+# alignment 2-pass
+# note: tested with -M 20971520 on LSF
+STAR --genomeDir $dmel/genome/star2/ --readFilesIn $hiseq_trim/R1_paired.gz $hiseq_trim/R2_paired.gz --outFilterMismatchNoverLmax 0.04 --alignSJDBoverhangMin 1 --outFileNamePrefix $hiseq_aln/star/star2 --quantMode TranscriptomeSAM
+
+
+# mapsplice
+
+# load mapsplice 
+module add UHTS/Analysis/MapSplice/2.1.5
+# load bowtie
+# note: use bowtie1: bowtie2 idx is not supported
+module add UHTS/Aligner/bowtie/0.12.9
+# index genome in chromosome files with bowtie
+bowtie-build $dmel/chromosomes/*.dna.chromosome* $dmel/chromosomes/dmel_chr_bowtie
+# get rid of spaces in ref IDs
+mkdir $dmel/genome/bowtie/
+cp $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa $dmel/genome/bowtie/dmel_ref.fa
+sed -i 's/ /_/g' $dmel/genome/bowtie/dmel_ref.fa
+# prepare outdir
+mkdir -p $hiseq_aln/mapsplice/
+# alignment 
+mapsplice.py -p 8 -c $dmel/genome/bowtie/ -x $dmel/chromosomes/dmel_chr_bowtie -1  $hiseq_trim/R1_paired.gz -2 $hiseq_trim/R2_paired.gz --gene-gtf $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf -o $hiseq_aln/mapsplice/
+
+
+# bbmap
+
+# load bbmap
+module add UHTS/Aligner/BBMap/32.15
+# build idx
+cd $dmel/genome/ && { bbmap.sh ref=Drosophila_melanogaster.BDGP6.31.dna.genome.fa; cd - }
+# prepare outdir
+mkdir -p $hiseq_aln/bbmap/ 
+# alignment
+cd $hiseq_aln/bbmap/ && { bbmap.sh in=$hiseq_trim/R1_paired.gz in2=$hiseq_trim/R2_paired.gz out=bbmap.sam; cd - }
+
+
 # 3) assembly
