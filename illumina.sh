@@ -107,7 +107,11 @@ hisat2 -q --phred33 --known-splicesite-infile $dmel/gtf/gtf_splicesites.txt --no
 # alignment 2-pass
 # note: tested with -M 20971520 on LSF
 hisat2 -q --phred33 --known-splicesite-infile $dmel/gtf/gtf_splicesites.txt --novel-splicesite-infile $dmel/gtf/hisat1_new_splicesites.txt --rna-strandness RF --dta-cufflinks -x $dmel/genome/hisat -1 $hiseq_trim/R1_paired.gz -2 $hiseq_trim/R2_paired.gz -S $hiseq_aln/hisat/hisat_2pass.sam
-
+# parameters: 
+# -q: quantification mode (alignemnt)
+# -x: dir where to read idx 
+# -1: list R1 reads comma sep
+# -2: list R2 reads comma sep
 
 # star 
 
@@ -127,6 +131,17 @@ STAR --runMode genomeGenerate --genomeDir $dmel/genome/star2/ --genomeFastaFiles
 # alignment 2-pass
 # note: tested with -M 20971520 on LSF
 STAR --genomeDir $dmel/genome/star2/ --readFilesIn $hiseq_trim/R1_paired.gz $hiseq_trim/R2_paired.gz --outFilterMismatchNoverLmax 0.04 --alignSJDBoverhangMin 1 --outFileNamePrefix $hiseq_aln/star/star2 --quantMode TranscriptomeSAM
+# parameters:
+# --outFileNamePrefix: path to output 
+# --runThreadN: n. CPU to use
+# --genomeDir: dir to idx files
+# --readFilesCommand: specify input reads are .gz
+# --readFilesIn: path/to/pairedR1 path/to/pairedR2
+# --genomeFastaFiles: dir to fasta
+# --outFilterScoreMinOverLread: outFilterScoreMin normalized to read length 
+# --outFilterMatchNminOverLread: outFilterMatchNmin normalized to read length
+# --outFilterMatchNmin: alignment will be output only if the number of matched bases is higher than this value
+#
 
 
 # mapsplice
