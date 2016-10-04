@@ -147,7 +147,7 @@ cd $dmel/genome/ && { bbmap.sh ref=Drosophila_melanogaster.BDGP6.31.dna.genome.f
 # prepare outdir
 mkdir -p $hiseq_aln/bbmap/ 
 # alignment
-cd $hiseq_aln/bbmap/ && { bbmap.sh in=$hiseq_trim/R1_paired.gz in2=$hiseq_trim/R2_paired.gz out=bbmap.sam; cd - }
+cd $dmel/genome/ && { bbmap.sh in=$hiseq_trim/R1_paired.gz in2=$hiseq_trim/R2_paired.gz out=$hiseq_aln/bbmap/bbmap.sam; cd - }
 
 
 # 3) assembly
