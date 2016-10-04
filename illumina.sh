@@ -176,3 +176,57 @@ cd $hiseq_aln/bbmap/ && { bbmap.sh in=$hiseq_trim/R1_paired.gz in2=$hiseq_trim/R
 
 
 # 3) assembly
+
+#  create assembly directory
+hiseq_ass=/scratch/beegfs/monthly/aechchik/MSc/illumina/assmebly
+mkdir -p $hiseq_ass
+
+# cufflinks
+# note: tested on LSF with -M 20971520
+# load module
+module add UHTS/Assembler/cufflinks/2.2.1
+# create cufflinks directory
+mkdir $hiseq_ass/cufflinks/
+# convert sam to bam & sort, use picard
+# load samtools: convert sam to bam 
+# load samtools
+module add UHTS/Analysis/samtools/1.3
+# sam to bam 
+samtools view -b -S -o $hiseq_aln/hisat/hisat_2pass.bam $hiseq_aln/hisat/hisat_2pass.sam 
+# load picard 
+module add UHTS/Analysis/picard-tools/2.2.1
+# run picard to sort file
+picard-tools SortSam I=$hiseq_aln/hisat/hisat_2pass.bam O=$hiseq_aln/hisat/hisat_2pass_sorted.bam SORT_ORDER=coordinate
+# start assembly on bam from hisat2
+cufflinks -p 8 -o $hiseq_ass/cufflinks/ -g $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf --library-type fr-firststrand $hiseq_aln/hisat/hisat_2pass_sorted.bam
+
+# trinity
+
+# create cufflinks directory
+mkdir $hiseq_ass/trinity/
+# load trinity 
+module add UHTS/Assembler/trinityrnaseq/2.1.1
+# run trinity
+Trinity --seqType fq --left $hiseq_trim/R1_paired.gz --right $hiseq_trim/R2_paired.gz --SS_lib_type RF --max_memory 20G --CPU 8 --output $hiseq_ass/trinity
+# build db 
+mkdir $dmel/blastdb
+# load blast 
+module add Blast/blast/2.2.26
+# build database
+makeblastdb -in $dmel/blastdb/uniprot_sprot.fasta -dbtype prot
+# blast trinity output to whole db
+blastx -query $hiseq_ass/trinity/Trinity.fasta -db $dmel/blastdb/uniprot_sprot.fasta -out $hiseq_ass/trinity/TrinityBlast -evalue 1e-20 -num_threads 6 -max_target_seqs 1 -outfmt 6
+
+# test: trinity refguided (input bam file from hist2)
+mkdir $hiseq_ass/trinity/genomeguided/
+# run assembly
+Trinity --genome_guided_bam $hiseq_aln/hisat/hisat_2pass_sorted.bam  --genome_guided_max_intron 10000 --max_memory 10G --CPU 8 --output $hiseq_ass/trinity/genomeguided/
+
+# stringtie
+
+# prepare wdir 
+mkdir $hiseq_ass/stringtie
+# load stringtie
+module add UHTS/Aligner/stringtie/1.2.3
+# run assembly
+stringtie $hiseq_aln/hisat/hisat_2pass_sorted.bam -o $hiseq_ass/stringtie/stringtie.gtf -p 8 -G $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf.gz 
