@@ -15,4 +15,70 @@ cat $pacbio_roi/ROI_3-7k.fastq | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2))
 
 # 1) alignment
 
+# note: for splice unaware aligners, map to transcriptome; for splice-aware aligners, map to genome
+
+# prepare directory
+pacbio_aln=/scratch/beegfs/monthly/aechchik/MSc/pacbio/alignment
+mkdir -p $pacbio_aln
+
+# bbmap 
+# note: on genome because splice-aware
+# prepare directory
+mkdir -p $pacbio_aln/bbmap
+# load bbmap
+module add UHTS/Aligner/BBMap/32.15
+# build idx
+cd $dmel/genome/ && { bbmap.sh ref=Drosophila_melanogaster.BDGP6.31.dna.genome.fa; cd - }
+# alignment
+cd $dmel/genome/ && { bbmap.sh in=$pacbio_reads/ROI_1-2k.fasta out=$pacbio_aln/bbmap/bbmap_ROI_1-2k.sam; cd - }
+cd $dmel/genome/ && { bbmap.sh in=$pacbio_reads/ROI_2-3k.fasta out=$pacbio_aln/bbmap/bbmap_ROI_2-3k.sam; cd - }
+cd $dmel/genome/ && { bbmap.sh in=$pacbio_reads/ROI_3-7k.fasta out=$pacbio_aln/bbmap/bbmap_ROI_3-7k.sam; cd - }
+
+# blasr
+# note; on transcriptome because splice-unaware
+# prepare directory
+mkdir -p $pacbio_aln/blasr
+# load blasr
+# note: pacbio specific software
+module add UHTS/PacBio/blasr/20140829
+# alignment
+blasr $pacbio_reads/ROI_1-2k.fasta $dmel/transcripts/Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa -nproc 24 -sam -out $pacbio_aln/blasr/blasr_ROI_1-2k.sam
+blasr $pacbio_reads/ROI_2-3k.fasta $dmel/transcripts/Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa -nproc 24 -sam -out $pacbio_aln/blasr/blasr_ROI_2-3k.sam
+blasr $pacbio_reads/ROI_3-7k.fasta $dmel/transcripts/Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa -nproc 24 -sam -out $pacbio_aln/blasr/blasr_ROI_3-7k.sam
+
+# bwamem
+# note: on genome because splice-aware
+# prepare directory
+mkdir -p $pacbio_aln/bwamem
+# load bwa
+module add UHTS/Aligner/bwa/0.7.13
+# alignment
+bwa mem -x pacbio $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa $pacbio_reads/ROI_1-2k.fasta > $pacbio_aln/bwamem/bwamem_ROI_1-2k.sam
+bwa mem -x pacbio $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa $pacbio_reads/ROI_2-3k.fasta > $pacbio_aln/bwamem/bwamem_ROI_2-3k.sam
+bwa mem -x pacbio $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa $pacbio_reads/ROI_3-7k.fasta > $pacbio_aln/bwamem/bwamem_ROI_3-7k.sam
+
+# gmap
+# note: on genome because splice-aware
+# note: not installed on cluster. ref to my home: need installation guidelines? on draft
+# prepare directory
+mkdir -p $pacbio_aln/gmap
+# create database
+/home/aechchik/bin/gmap-2016-06-30/bin/gmap_build -d GDB -D $dmel/chromosomes/ $dmel/chromosomes/*.fa 
+# alignment 
+/home/aechchik/bin/gmap-2016-06-30/bin/gmap -d GDB -D $dmel/chromosomes/ $pacbio_reads/ROI_1-2k.fasta -f samse -n 0 -t 16 > $pacbio_aln/gmap/gmap_ROI_1-2k.sam
+/home/aechchik/bin/gmap-2016-06-30/bin/gmap -d GDB -D $dmel/chromosomes/ $pacbio_reads/ROI_2-3k.fasta -f samse -n 0 -t 16 > $pacbio_aln/gmap/gmap_ROI_2-3k.sam
+/home/aechchik/bin/gmap-2016-06-30/bin/gmap -d GDB -D $dmel/chromosomes/ $pacbio_reads/ROI_3-7k.fasta -f samse -n 0 -t 16 > $pacbio_aln/gmap/gmap_ROI_3-7k.sam
+
+# graphmap
+# note: on trasncriptome because non-splice aware
+# note: not installed on cluster. ref to my /home: need installation guidelines?on draft
+# prepare directory
+mkdir -p $pacbio_aln/graphmap
+# alignment
+/home/aechchik/bin/graphmap/bin/Linux-x64/graphmap align -r $dmel/transcripts/Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa -d $pacbio_reads/ROI_1-2k.fasta -o $pacbio_aln/graphmap/graphmap_ROI_1-2k.sam
+/home/aechchik/bin/graphmap/bin/Linux-x64/graphmap align -r $dmel/transcripts/Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa -d $pacbio_reads/ROI_2-3k.fasta -o $pacbio_aln/graphmap/graphmap_ROI_2-3k.sam
+/home/aechchik/bin/graphmap/bin/Linux-x64/graphmap align -r $dmel/transcripts/Drosophila_melanogaster.BDGP6.31.dna.transcripts.fa -d $pacbio_reads/ROI_3-7k.fasta -o $pacbio_aln/graphmap/graphmap_ROI_3-7k.sam
+# note: readme http://research-pub.gene.com/gmap/src/README
+
+
 # 2) assembly?
