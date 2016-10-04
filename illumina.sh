@@ -70,15 +70,15 @@ mkdir -p $dmel/chromosomes/
 cd $dmel/chromosomes/ && { curl -O ftp://ftp.ensemblgenomes.org/pub/metazoa/release-31/fasta/drosophila_melanogaster/dna/*.dna.chromosome*; gzip -d *.gz; cd -; }
 
 # get full genome
-mkdir $dmel/genome/
+mkdir -p $dmel/genome/
 cd $dmel/genome/ && { curl -O ftp://ftp.ensemblgenomes.org/pub/metazoa/release-31/fasta/drosophila_melanogaster/dna/Drosophila_melanogaster.BDGP6.31.dna.genome.fa.gz; gzip -d *.gz; cd -; }
 
 # get gtf annotation
-mkdir $dmel/gtf/
+mkdir -p $dmel/gtf/
 cd $dmel/gtf/ && { curl -O ftp://ftp.ensembl.org/pub/release-84/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.84.gtf.gz; gzip -d *.gz; cd -}
 
 # extract transcripts from full genome
-mkdir $dmel/transcripts/
+mkdir -p $dmel/transcripts/
 # load cufflinks
 module add UHTS/Assembler/cufflinks/2.2.1
 # extract annotated regions
@@ -154,7 +154,7 @@ module add UHTS/Aligner/bowtie/0.12.9
 # index genome in chromosome files with bowtie
 bowtie-build $dmel/chromosomes/*.dna.chromosome* $dmel/chromosomes/dmel_chr_bowtie
 # get rid of spaces in ref IDs
-mkdir $dmel/genome/bowtie/
+mkdir -p $dmel/genome/bowtie/
 cp $dmel/genome/Drosophila_melanogaster.BDGP6.31.dna.genome.fa $dmel/genome/bowtie/dmel_ref.fa
 sed -i 's/ /_/g' $dmel/genome/bowtie/dmel_ref.fa
 # prepare outdir
@@ -186,7 +186,7 @@ mkdir -p $hiseq_ass
 # load module
 module add UHTS/Assembler/cufflinks/2.2.1
 # create cufflinks directory
-mkdir $hiseq_ass/cufflinks/
+mkdir -p $hiseq_ass/cufflinks/
 # convert sam to bam & sort, use picard
 # load samtools: convert sam to bam 
 # load samtools
@@ -203,13 +203,13 @@ cufflinks -p 8 -o $hiseq_ass/cufflinks/ -g $dmel/gtf/Drosophila_melanogaster.BDG
 # trinity
 
 # create cufflinks directory
-mkdir $hiseq_ass/trinity/
+mkdir -p $hiseq_ass/trinity/
 # load trinity 
 module add UHTS/Assembler/trinityrnaseq/2.1.1
 # run trinity
 Trinity --seqType fq --left $hiseq_trim/R1_paired.gz --right $hiseq_trim/R2_paired.gz --SS_lib_type RF --max_memory 20G --CPU 8 --output $hiseq_ass/trinity
 # build db 
-mkdir $dmel/blastdb
+mkdir -p $dmel/blastdb
 # load blast 
 module add Blast/blast/2.2.26
 # build database
@@ -218,15 +218,15 @@ makeblastdb -in $dmel/blastdb/uniprot_sprot.fasta -dbtype prot
 blastx -query $hiseq_ass/trinity/Trinity.fasta -db $dmel/blastdb/uniprot_sprot.fasta -out $hiseq_ass/trinity/TrinityBlast -evalue 1e-20 -num_threads 6 -max_target_seqs 1 -outfmt 6
 
 # test: trinity refguided (input bam file from hist2)
-mkdir $hiseq_ass/trinity/genomeguided/
+mkdir -p $hiseq_ass/trinity/genomeguided/
 # run assembly
 Trinity --genome_guided_bam $hiseq_aln/hisat/hisat_2pass_sorted.bam  --genome_guided_max_intron 10000 --max_memory 10G --CPU 8 --output $hiseq_ass/trinity/genomeguided/
 
 # stringtie
 
 # prepare wdir 
-mkdir $hiseq_ass/stringtie
+mkdir -p $hiseq_ass/stringtie
 # load stringtie
 module add UHTS/Aligner/stringtie/1.2.3
 # run assembly
-stringtie $hiseq_aln/hisat/hisat_2pass_sorted.bam -o $hiseq_ass/stringtie/stringtie.gtf -p 8 -G $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf.gz 
+stringtie $hiseq_aln/hisat/hisat_2pass_sorted.bam -o $hiseq_ass/stringtie/stringtie.gtf -p 8 -G $dmel/gtf/Drosophila_melanogaster.BDGP6.84.gtf 
