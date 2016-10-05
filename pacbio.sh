@@ -95,6 +95,8 @@ mkdir -p $pacbio_aln/graphmap
 pacbio_aln=/scratch/beegfs/monthly/aechchik/MSc/pacbio/alignment/isoseq
 mkdir -p $pacbio_aln
 
+pacbio_isoseq=/scratch/beegfs/monthly/aechchik/MSc/pacbio/reads/isoseq
+
 # bbmap 
 # note: on genome because splice-aware
 # prepare directory
