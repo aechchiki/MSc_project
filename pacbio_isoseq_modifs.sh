@@ -44,7 +44,7 @@ cat $pacbio_isoforms/isoforms_3-7k.fasta | awk '/^>/{print s? s"\n"$0:$0;s="";ne
 
 # cut non-meaningful read name in fasta header
 
-cat $pacbio_isoforms/isoforms_clean_1-2k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoforms_headclean_1-2k.fasta
-cat $pacbio_isoforms/isoforms_clean_2-3k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoforms_headclean_2-3k.fasta
-cat $pacbio_isoforms/isoforms_clean_3-7k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoforms_headclean_3-7k.fasta
+cat $pacbio_isoforms/isoforms_clean_1-2k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoseq_1-2k.fasta
+cat $pacbio_isoforms/isoforms_clean_2-3k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoseq_2-3k.fasta
+cat $pacbio_isoforms/isoforms_clean_3-7k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoseq_3-7k.fasta
 
