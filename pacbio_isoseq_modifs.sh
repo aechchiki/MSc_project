@@ -48,3 +48,31 @@ cat $pacbio_isoforms/isoforms_clean_1-2k.fasta | sed 's/ isoform=c.*/ /g' | sed 
 cat $pacbio_isoforms/isoforms_clean_2-3k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoseq_2-3k.fasta
 cat $pacbio_isoforms/isoforms_clean_3-7k.fasta | sed 's/ isoform=c.*/ /g' | sed 's/CCS.*/CCS/g' > $pacbio_isoforms/isoseq_3-7k.fasta
 
+# changes in the mapping file to conform to the fasta header of the corresponding fraction 
+
+# define mapping directory
+
+pacbio_aln=/scratch/beegfs/monthly/aechchik/MSc/pacbio/alignment/isoseq
+
+# change header: cut after the first space and the first tab in mapping file
+
+cat $pacbio_aln/bbmap/bbmap_isoseq_1-2k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/bbmap/bbmap_isoseqclean_1-2k.sam
+cat $pacbio_aln/bbmap/bbmap_isoseq_2-3k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/bbmap/bbmap_isoseqclean_2-3k.sam
+cat $pacbio_aln/bbmap/bbmap_isoseq_3-7k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/bbmap/bbmap_isoseqclean_3-7k.sam
+
+cat $pacbio_aln/blasr/blasr_isoseq_1-2k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/blasr/blasr_isoseqclean_1-2k.sam
+cat $pacbio_aln/blasr/blasr_isoseq_2-3k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/blasr/blasr_isoseqclean_2-3k.sam
+cat $pacbio_aln/blasr/blasr_isoseq_3-7k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/blasr/blasr_isoseqclean_3-7k.sam
+
+cat $pacbio_aln/bwamem/bwamem_isoseq_1-2k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/bwamem/bwamem_isoseqclean_1-2k.sam
+cat $pacbio_aln/bwamem/bwamem_isoseq_2-3k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/bwamem/bwamem_isoseqclean_2-3k.sam
+cat $pacbio_aln/bwamem/bwamem_isoseq_3-7k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/bwamem/bwamem_isoseqclean_3-7k.sam
+
+cat $pacbio_aln/gmap/gmap_isoseq_1-2k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/gmap/gmap_isoseqclean_1-2k.sam
+cat $pacbio_aln/gmap/gmap_isoseq_2-3k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/gmap/gmap_isoseqclean_2-3k.sam
+cat $pacbio_aln/gmap/gmap_isoseq_3-7k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/gmap/gmap_isoseqclean_3-7k.sam
+
+cat $pacbio_aln/graphmap/graphmap_isoseq_1-2k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/graphmap/graphmap_isoseqclean_1-2k.sam
+cat $pacbio_aln/graphmap/graphmap_isoseq_2-3k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/graphmap/graphmap_isoseqclean_2-3k.sam
+cat $pacbio_aln/graphmap/graphmap_isoseq_3-7k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/graphmap/graphmap_isoseqclean_3-7k.sam
+
