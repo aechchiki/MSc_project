@@ -1,0 +1,3 @@
+FlowcellNumber	FlowcellVersion	ProtocolVersion	BasecallingVersion	TotalReads	TemplateReads	ComplementReads	2DReads		
+R7	?	?	?	393908	158855	121804	113249
+R9	?	?	?	120954	40318	40318	40318
