@@ -76,3 +76,63 @@ cat $pacbio_aln/graphmap/graphmap_isoseq_1-2k.sam | grep -v ^@ | sed 's/ [^\t]*\
 cat $pacbio_aln/graphmap/graphmap_isoseq_2-3k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/graphmap/graphmap_isoseqclean_2-3k.sam
 cat $pacbio_aln/graphmap/graphmap_isoseq_3-7k.sam | grep -v ^@ | sed 's/ [^\t]*\t/\t/' > $pacbio_aln/graphmap/graphmap_isoseqclean_3-7k.sam
 
+# keep only reads that have non-null mapping and seen once
+
+# bbmap 
+# flags: 0; 16; 4
+cat $pacbio_aln/bbmap/bbmap_isoseqclean_1-2k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/bbmap/bbmap_isoseqclean_2-3k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/bbmap/bbmap_isoseqclean_3-7k.sam | awk '{print $2}' | sort | uniq -c
+
+# blasr
+# flags: 0, 16, 256, 272
+cat $pacbio_aln/blasr/blasr_isoseqclean_1-2k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/blasr/blasr_isoseqclean_2-3k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/blasr/blasr_isoseqclean_3-7k.sam | awk '{print $2}' | sort | uniq -c
+
+# bwamem
+# flags: 0, 16, 2048, 2064, 4
+cat $pacbio_aln/bwamem/bwamem_isoseqclean_1-2k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/bwamem/bwamem_isoseqclean_2-3k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/bwamem/bwamem_isoseqclean_3-7k.sam | awk '{print $2}' | sort | uniq -c
+
+# gmap 
+# flags: 0, 16, 4
+cat $pacbio_aln/gmap/gmap_isoseqclean_1-2k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/gmap/gmap_isoseqclean_2-3k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/gmap/gmap_isoseqclean_3-7k.sam | awk '{print $2}' | sort | uniq -c
+
+# graphmap
+# flags: 0, 16, 4
+cat $pacbio_aln/graphmap/graphmap_isoseqclean_1-2k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/graphmap/graphmap_isoseqclean_2-3k.sam | awk '{print $2}' | sort | uniq -c
+cat $pacbio_aln/graphmap/graphmap_isoseqclean_3-7k.sam | awk '{print $2}' | sort | uniq -c
+
+# keep non.unmapped and non-secondary alignments, seen once
+
+# bbmap
+cat $pacbio_aln/bbmap/bbmap_isoseqclean_1-2k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/bbmap/bbmap_clean_1-2k.sam
+cat $pacbio_aln/bbmap/bbmap_isoseqclean_2-3k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/bbmap/bbmap_clean_2-3k.sam
+cat $pacbio_aln/bbmap/bbmap_isoseqclean_3-7k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/bbmap/bbmap_clean_3-7k.sam
+
+# blasr
+cat $pacbio_aln/blasr/blasr_isoseqclean_1-2k.sam | awk '$2!=256{print $0}' | awk '$2!=272{print $0}' | awk '!seen[$1]++' > $pacbio_aln/blasr/blasr_clean_1-2k.sam
+cat $pacbio_aln/blasr/blasr_isoseqclean_2-3k.sam | awk '$2!=256{print $0}' | awk '$2!=272{print $0}' | awk '!seen[$1]++' > $pacbio_aln/blasr/blasr_clean_2-3k.sam
+cat $pacbio_aln/blasr/blasr_isoseqclean_3-7k.sam | awk '$2!=256{print $0}' | awk '$2!=272{print $0}' | awk '!seen[$1]++' > $pacbio_aln/blasr/blasr_clean_3-7k.sam
+
+# bwamem
+cat $pacbio_aln/bwamem/bwamem_isoseqclean_1-2k.sam | awk '$2!=2048{print $0}' | awk '$2!=2064{print $0}' | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/bwamem/bwamem_clean_1-2k.sam
+cat $pacbio_aln/bwamem/bwamem_isoseqclean_2-3k.sam | awk '$2!=2048{print $0}' | awk '$2!=2064{print $0}' | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/bwamem/bwamem_clean_2-3k.sam
+cat $pacbio_aln/bwamem/bwamem_isoseqclean_3-7k.sam | awk '$2!=2048{print $0}' | awk '$2!=2064{print $0}' | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/bwamem/bwamem_clean_3-7k.sam
+
+# gmap
+cat $pacbio_aln/gmap/gmap_isoseqclean_1-2k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/gmap/gmap_clean_1-2k.sam
+cat $pacbio_aln/gmap/gmap_isoseqclean_2-3k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/gmap/gmap_clean_2-3k.sam
+cat $pacbio_aln/gmap/gmap_isoseqclean_3-7k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/gmap/gmap_clean_3-7k.sam
+
+# graphmap
+cat $pacbio_aln/graphmap/graphmap_isoseqclean_1-2k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/graphmap/graphmap_clean_1-2k.sam
+cat $pacbio_aln/graphmap/graphmap_isoseqclean_2-3k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/graphmap/graphmap_clean_2-3k.sam
+cat $pacbio_aln/graphmap/graphmap_isoseqclean_3-7k.sam | awk '$2!=4{print $0}' | awk '!seen[$1]++' > $pacbio_aln/graphmap/graphmap_clean_3-7k.sam
+
+# bwa

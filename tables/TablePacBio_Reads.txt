@@ -1,4 +1,4 @@
-LibrarySize	TotalSubreads	ReadsOfInsert
-1-2k	1475440	122805
-2-3k	1286269	171652
-3-7k	572804	158931
+LibrarySize	TotalSubreads	ReadsOfInsert	IsoformsIsoSeq
+1-2k	1475440	122805	89344
+2-3k	1286269	171652	100750
+3-7k	572804	158931	76797
